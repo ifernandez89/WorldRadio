@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0A0B0D" />
+    <meta
+      name="description"
+      content="WorldRadio — Explorador mundial de más de 50.000 emisoras de radio en vivo por país, género y favoritas."
+    />
+    <title>WorldRadio — Sintonizador Mundial</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="grain-overlay" aria-hidden="true"></div>
+    <div id="app">
+      <!-- TOP INSTRUMENT BAR -->
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span class="brand-ring"></span>
+            <span class="brand-core"></span>
+          </div>
+          <div class="brand-copy">
+            <h1 class="brand-title">WORLDRADIO</h1>
+            <p class="brand-telemetry" id="global-stats">SW-50K · CONECTANDO DIRECTORIO...</p>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Vistas principales">
+          <button type="button" class="nav-tab is-active" data-view="explore" aria-pressed="true">
+            Explorar
+          </button>
+          <button type="button" class="nav-tab" data-view="favorites" aria-pressed="false">
+            Favoritas <span class="tab-count" id="fav-count">0</span>
+          </button>
+          <button type="button" class="nav-tab" data-view="recent" aria-pressed="false">
+            Recientes
+          </button>
+        </nav>
+
+        <button
+          type="button"
+          class="btn-random"
+          id="btn-random"
+          title="Sintonizar una emisora aleatoria del filtro actual"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+          <span>Al azar</span>
+        </button>
+      </header>
+
+      <main class="workspace">
+        <!-- HERO SHORTWAVE TUNER DECK -->
+        <section class="tuner-deck" id="tuner-deck" aria-label="Sintonizador activo">
+          <div class="tuner-top-row">
+            <div class="signal-pill" id="signal-pill" role="status" aria-live="polite">
+              <span class="signal-led" id="signal-led"></span>
+              <span class="signal-label" id="signal-label">EN ESPERA</span>
+            </div>
+
+            <div class="tuner-tech-pills" id="tuner-tech-pills">
+              <span class="tech-chip">FM / SW DIGITAL</span>
+              <span class="tech-chip">HTTPS READY</span>
+            </div>
+
+            <div class="tuner-utilities">
+              <div class="sleep-wrap">
+                <button
+                  type="button"
+                  class="icon-pill"
+                  id="btn-sleep"
+                  title="Temporizador de apagado automático"
+                  aria-label="Temporizador de apagado"
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                  </svg>
+                  <span id="sleep-label">Sleep</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tuner-main-grid">
+            <!-- Left: Frequency + Dial + VU -->
+            <div class="dial-module">
+              <div class="dial-readout-row">
+                <div class="freq-display">
+                  <span class="freq-value" id="dial-freq">88.0</span>
+                  <span class="freq-unit">MHz</span>
+                </div>
+                <div class="vu-meter" id="vu-meter" aria-hidden="true"></div>
+              </div>
+
+              <div class="analog-scale" aria-hidden="true">
+                <div class="scale-ticks">
+                  <span>88</span><span>90</span><span>92</span><span>94</span><span>96</span><span>98</span><span>100</span><span>102</span><span>104</span><span>106</span><span>108</span>
+                </div>
+                <div class="scale-track">
+                  <div class="scale-needle" id="dial-needle" style="left: 14%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Active Station Info & Transport -->
+            <div class="station-deck">
+              <div class="active-station-head">
+                <div class="active-art" id="active-art">
+                  <span class="art-fallback">📡</span>
+                </div>
+                <div class="active-meta">
+                  <h2 class="active-name" id="active-name">Elegí una emisora del mundo</h2>
+                  <p class="active-sub" id="active-sub">
+                    Tocá cualquier radio abajo o pulsá «Al azar» para sintonizar al instante.
+                  </p>
+                </div>
+              </div>
+
+              <div class="transport-row">
+                <div class="transport-buttons">
+                  <button type="button" class="btn-transport" id="btn-prev" aria-label="Emisora anterior" disabled>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                      <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn-play-main" id="btn-play-main" aria-label="Reproducir o pausar" disabled>
+                    <svg class="icon-play" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                      <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                    <svg class="icon-pause" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                      <path d="M6 5h4v14H6zm8 0h4v14h-4z"></path>
+                    </svg>
+                    <span class="spinner-ring" aria-hidden="true"></span>
+                  </button>
+                  <button type="button" class="btn-transport" id="btn-next" aria-label="Siguiente emisora" disabled>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                      <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn-transport btn-fav-active" id="btn-active-fav" aria-label="Guardar en favoritas" disabled>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="volume-control">
+                  <button type="button" class="btn-mute" id="btn-mute" aria-label="Silenciar">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path class="vol-wave" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                      <path class="vol-wave-2" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                  </button>
+                  <input
+                    type="range"
+                    id="volume-slider"
+                    min="0"
+                    max="100"
+                    value="85"
+                    aria-label="Volumen"
+                  />
+                  <span class="vol-pct" id="vol-pct">85%</span>
+                </div>
+              </div>
+
+              <div class="tuner-error" id="tuner-error" hidden>
+                <span class="tuner-error-msg" id="tuner-error-msg"></span>
+                <button type="button" class="btn-retry-next" id="btn-try-next">
+                  Probar otra similar
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- EXPLORER CONTROLS (Hidden in Favorites/Recent views) -->
+        <section class="controls-panel" id="controls-panel" aria-label="Filtros y búsqueda">
+          <div class="search-row">
+            <div class="search-box">
+              <svg class="search-icon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="search"
+                id="search-input"
+                placeholder="Buscar radio por nombre... (ej. Aspen, Sunshine, BBC, Jazz, Tokyo)"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button type="button" class="btn-clear-search" id="btn-clear-search" aria-label="Limpiar búsqueda" hidden>
+                ×
+              </button>
+            </div>
+
+            <div class="search-options">
+              <select id="sort-select" class="select-control" aria-label="Ordenar emisoras">
+                <option value="votes">Más votadas</option>
+                <option value="clickcount">Más escuchadas</option>
+                <option value="bitrate">Mayor calidad (kbps)</option>
+              </select>
+
+              <label class="https-toggle" title="En GitHub Pages (HTTPS), los navegadores bloquean streams HTTP inseguros">
+                <input type="checkbox" id="https-toggle" checked />
+                <span class="toggle-track"></span>
+                <span class="toggle-text">HTTPS</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Country Ribbon -->
+          <div class="filter-block">
+            <div class="filter-head">
+              <span class="filter-label">PAÍS / REGIÓN</span>
+              <button type="button" class="btn-all-countries" id="btn-all-countries">
+                Todos los países (224) →
+              </button>
+            </div>
+            <div class="country-ribbon" id="country-ribbon" role="listbox" aria-label="Países destacados"></div>
+          </div>
+
+          <!-- Genre Preset Rack -->
+          <div class="filter-block">
+            <div class="filter-head">
+              <span class="filter-label">BANDA DE GÉNEROS</span>
+              <button type="button" class="btn-reset-filters" id="btn-reset-filters" hidden>
+                Restablecer filtros
+              </button>
+            </div>
+            <div class="genre-rack" id="genre-rack" role="listbox" aria-label="Géneros musicales"></div>
+          </div>
+        </section>
+
+        <!-- FAVORITES / RECENT TOOLBAR -->
+        <section class="collection-bar" id="collection-bar" hidden>
+          <div class="collection-info">
+            <h2 class="collection-title" id="collection-title">Tus emisoras favoritas</h2>
+            <p class="collection-sub" id="collection-sub">Guardadas en este dispositivo</p>
+          </div>
+          <div class="collection-actions" id="collection-actions">
+            <button type="button" class="btn-subtle" id="btn-export-favs">Exportar JSON</button>
+            <label class="btn-subtle" for="import-favs-input">
+              Importar JSON
+              <input type="file" id="import-favs-input" accept="application/json,.json" hidden />
+            </label>
+            <button type="button" class="btn-subtle btn-danger" id="btn-clear-recent" hidden>
+              Limpiar historial
+            </button>
+          </div>
+        </section>
+
+        <!-- RESULTS HEADER -->
+        <div class="results-bar">
+          <p class="results-summary" id="results-summary">Cargando emisoras...</p>
+          <span class="mirror-badge" id="filter-badge"></span>
+        </div>
+
+        <!-- STATIONS GRID -->
+        <section class="stations-grid" id="stations-grid" aria-label="Lista de emisoras"></section>
+
+        <!-- LOAD MORE -->
+        <div class="load-more-wrap" id="load-more-wrap" hidden>
+          <button type="button" class="btn-load-more" id="btn-load-more">
+            Cargar más emisoras
+          </button>
+        </div>
+      </main>
+
+      <!-- STICKY MOBILE / SCROLL MINI PLAYER -->
+      <aside class="mini-player" id="mini-player" hidden aria-label="Reproductor rápido">
+        <div class="mini-info" id="mini-scroll-top">
+          <span class="mini-dot" id="mini-dot"></span>
+          <div class="mini-text">
+            <strong id="mini-name">—</strong>
+            <span id="mini-sub">—</span>
+          </div>
+        </div>
+        <div class="mini-actions">
+          <button type="button" class="mini-btn" id="mini-fav" aria-label="Favorita">♥</button>
+          <button type="button" class="mini-btn mini-play" id="mini-play" aria-label="Reproducir o pausar">▶</button>
+          <button type="button" class="mini-btn" id="mini-next" aria-label="Siguiente">⏭</button>
+        </div>
+      </aside>
+
+      <!-- ALL COUNTRIES MODAL -->
+      <div class="modal-backdrop" id="country-modal" hidden role="dialog" aria-modal="true" aria-labelledby="country-modal-title">
+        <div class="modal-sheet">
+          <div class="modal-head">
+            <h3 id="country-modal-title">Directorio Mundial de Países</h3>
+            <button type="button" class="modal-close" id="btn-close-modal" aria-label="Cerrar">×</button>
+          </div>
+          <div class="modal-search-wrap">
+            <input
+              type="search"
+              id="country-search-input"
+              placeholder="Filtrar país... (ej. Argentina, Japan, Sweden, Uruguay)"
+              autocomplete="off"
+            />
+          </div>
+          <div class="country-modal-list" id="country-modal-list"></div>
+        </div>
+      </div>
+
+      <!-- TOAST NOTIFICATION -->
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
