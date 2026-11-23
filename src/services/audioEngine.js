@@ -289,7 +289,10 @@ export class RadioAudioEngine {
     if (station.favicon && station.favicon.startsWith('https://')) {
       artwork.push({ src: station.favicon, sizes: '192x192' });
     }
-    artwork.push({ src: './favicon.svg', sizes: '128x128', type: 'image/svg+xml' });
+    artwork.push(
+      { src: './icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: './icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+    );
 
     try {
       navigator.mediaSession.metadata = new MediaMetadata({

@@ -56,6 +56,7 @@ const el = {
   globalStats: document.getElementById('global-stats'),
   favCount: document.getElementById('fav-count'),
   navTabs: document.querySelectorAll('.nav-tab'),
+  btnInstall: document.getElementById('btn-install'),
   btnRandom: document.getElementById('btn-random'),
 
   tunerDeck: document.getElementById('tuner-deck'),
@@ -942,6 +943,38 @@ function bindEvents() {
   });
 }
 
+// ==================== PWA INSTALL & SERVICE WORKER ====================
+let deferredInstallPrompt = null;
+
+function setupPwa() {
+  if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    el.btnInstall.hidden = false;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    el.btnInstall.hidden = true;
+    showToast('WorldRadio instalada en tu pantalla principal');
+  });
+
+  el.btnInstall.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    try {
+      await deferredInstallPrompt.userChoice;
+    } finally {
+      deferredInstallPrompt = null;
+      el.btnInstall.hidden = true;
+    }
+  });
+}
+
 // ==================== BOOT ====================
 async function init() {
   buildVuMeter();
@@ -949,6 +982,7 @@ async function init() {
   renderGenreRack();
   updateFavoritesBadge();
   bindEvents();
+  setupPwa();
 
   // Observe main tuner deck visibility so mini-player only appears while scrolling the list
   if ('IntersectionObserver' in window) {
